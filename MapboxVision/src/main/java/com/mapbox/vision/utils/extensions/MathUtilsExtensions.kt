@@ -1,6 +1,12 @@
 package com.mapbox.vision.utils.extensions
 
+import android.content.res.AssetManager
 import java.nio.ByteBuffer
+import android.graphics.BitmapFactory
+import android.graphics.Bitmap
+import java.io.IOException
+import java.io.InputStream
+
 
 /**
  * The inverse-logit function
@@ -59,9 +65,10 @@ fun FloatArray.fillRGBAndNormalizeByValue(intValues: IntArray) {
  */
 fun ByteArray.fillRGB(intValues: IntArray) {
     for (i in intValues.indices) {
-        this[i * 3 + 0] = (intValues[i] shr 16 and 0xFF).toByte()
-        this[i * 3 + 1] = (intValues[i] shr 8 and 0xFF).toByte()
-        this[i * 3 + 2] = (intValues[i] and 0xFF).toByte()
+        this[i * 4 + 3] = (intValues[i] shr 24 and 0xFF).toByte()
+        this[i * 4 + 0] = (intValues[i] shr 16 and 0xFF).toByte()
+        this[i * 4 + 1] = (intValues[i] shr 8 and 0xFF).toByte()
+        this[i * 4 + 2] = (intValues[i] and 0xFF).toByte()
     }
 }
 
@@ -75,6 +82,18 @@ fun FloatArray.fillBGRAndNormalizeByValue(intValues: IntArray) {
         this[i * 3 + 0] = 2 * (intValues[i] and 0xFF) / 255.0f - 1
     }
 }
+
+ fun AssetManager.getBitmapFromAsset(strName: String): Bitmap {
+    var istr: InputStream? = null
+    try {
+        istr = this.open(strName)
+    } catch (e: IOException) {
+        e.printStackTrace()
+    }
+
+    return BitmapFactory.decodeStream(istr)
+}
+
 
 /**
  * Preprocess the image data from 0-255 int to normalized float (-1;1)

@@ -19,6 +19,8 @@ import com.mapbox.vision.sensors.SensorsRequestsManager
 import com.mapbox.vision.telemetry.MapboxTelemetryEventManager
 import com.mapbox.vision.telemetry.TelemetrySyncManager
 import com.mapbox.vision.utils.FileUtils
+import com.mapbox.vision.utils.extensions.fillRGB
+import com.mapbox.vision.utils.extensions.getBitmapFromAsset
 import com.mapbox.vision.utils.threads.MainThreadHandler
 import com.mapbox.vision.utils.threads.WorkThreadHandler
 import com.mapbox.vision.video.videoprocessor.VideoProcessor
@@ -130,10 +132,17 @@ object VisionManager : ARDataProvider {
         }
     }
 
+    private val testBitmapArray by lazy {
+        val bitmap = application.assets.getBitmapFromAsset("test_image.png")
+        val pixelArray = IntArray(1280*768)
+        bitmap.getPixels(pixelArray,0,bitmap.width,0,0,bitmap.width,bitmap.height)
+        ByteArray(1280*768*4).also { it.fillRGB(pixelArray) }
+    }
+
     private val visionManagerVideoSourceListener = object : VideoSourceListener {
 
         override fun onNewFrame(rgbBytes: ByteArray) {
-            visionCore.setRGBABytes(rgbBytes, videoSource.getSourceWidth(), videoSource.getSourceHeight())
+            visionCore.setRGBABytes(testBitmapArray, videoSource.getSourceWidth(), videoSource.getSourceHeight())
         }
 
         override fun onNewBitmap(bitmap: Bitmap) {
