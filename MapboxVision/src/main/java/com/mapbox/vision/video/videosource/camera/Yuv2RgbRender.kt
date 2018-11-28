@@ -17,26 +17,29 @@ internal class Yuv2RgbRender(
 
     private val inputNormalAllocation: Allocation
     private val outputAllocation: Allocation
-    private val scriptC = ScriptIntrinsicYuvToRGB.create(renderScript, Element.RGBA_8888(renderScript))
-
-    private var useBitmap = false
+    private val script = ScriptIntrinsicYuvToRGB.create(renderScript, Element.RGBA_8888(renderScript))
 
     init {
         val yuvTypeBuilder = Type.Builder(renderScript, Element.YUV(renderScript))
         yuvTypeBuilder.setX(previewSize.width)
         yuvTypeBuilder.setY(previewSize.height)
         yuvTypeBuilder.setYuvFormat(ImageFormat.YUV_420_888)
-        inputNormalAllocation = Allocation.createTyped(renderScript, yuvTypeBuilder.create(),
-                Allocation.USAGE_IO_INPUT or Allocation.USAGE_SCRIPT)
-
+        inputNormalAllocation = Allocation.createTyped(
+                renderScript,
+                yuvTypeBuilder.create(),
+                Allocation.USAGE_IO_INPUT or Allocation.USAGE_SCRIPT
+        )
 
         val rgbTypeBuilder = Type.Builder(renderScript, Element.RGBA_8888(renderScript))
         rgbTypeBuilder.setX(previewSize.width)
         rgbTypeBuilder.setY(previewSize.height)
-        outputAllocation = Allocation.createTyped(renderScript, rgbTypeBuilder.create(),
-                Allocation.USAGE_SCRIPT)
+        outputAllocation = Allocation.createTyped(
+                renderScript,
+                rgbTypeBuilder.create(),
+                Allocation.USAGE_SCRIPT
+        )
 
-        scriptC.setInput(inputNormalAllocation)
+        script.setInput(inputNormalAllocation)
         inputNormalAllocation.setOnBufferAvailableListener(this)
     }
 
@@ -44,29 +47,22 @@ internal class Yuv2RgbRender(
         return inputNormalAllocation.surface
     }
 
-    fun useBitmap(useBitmap: Boolean) {
-        this.useBitmap = useBitmap
-    }
-
     override fun onBufferAvailable(a: Allocation) {
+        var millis = System.currentTimeMillis()
         // Get to newest input
         inputNormalAllocation.ioReceive()
 
+//        println("RS onAvailable received ${System.currentTimeMillis() - millis}")
+//        millis = System.currentTimeMillis()
         // Run processing pass
-        scriptC.forEach(outputAllocation)
+        script.forEach(outputAllocation)
 
-        if (useBitmap) {
-            val array = renderActionsListener.getRgbBytesArray()
-            outputAllocation.copyTo(array)
-
-            val bitmap = renderActionsListener.getBitmap()
-            outputAllocation.copyTo(bitmap)
-        } else {
-            val array = renderActionsListener.getRgbBytesArray()
-            outputAllocation.copyTo(array)
-        }
+//        println("RS onAvailable onEach ${System.currentTimeMillis() - millis}")
+//        millis = System.currentTimeMillis()
+        val array = renderActionsListener.getRgbBytesArray()
+        outputAllocation.copyTo(array)
+        println("RS duration : ${System.currentTimeMillis() - millis}")
         renderActionsListener.onDataReady()
-
     }
 
     fun release() {
@@ -74,5 +70,4 @@ internal class Yuv2RgbRender(
         inputNormalAllocation.destroy()
         outputAllocation.destroy()
     }
-
 }

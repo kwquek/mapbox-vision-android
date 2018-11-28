@@ -1,7 +1,6 @@
 package com.mapbox.vision.video.videosource
 
-internal interface VideoSource {
-
+interface VideoSource {
     fun getSourceWidth(): Int
 
     fun getSourceHeight(): Int
@@ -17,6 +16,4 @@ internal interface VideoSource {
     fun stopVideoRecording()
 
     fun startVideoRecording()
-
-    fun useBitmap(useBitmap: Boolean)
 }

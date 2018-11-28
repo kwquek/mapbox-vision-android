@@ -1,7 +1,6 @@
 package com.mapbox.vision
 
 import android.app.Application
-import android.graphics.Bitmap
 import android.util.Log
 import com.mapbox.android.telemetry.AppUserTurnstile
 import com.mapbox.android.telemetry.MapboxTelemetry
@@ -31,7 +30,7 @@ import com.mapbox.vision.video.videoprocessor.VideoProcessor
 import com.mapbox.vision.video.videoprocessor.VideoProcessorListener
 import com.mapbox.vision.video.videosource.VideoSource
 import com.mapbox.vision.video.videosource.VideoSourceListener
-import com.mapbox.vision.video.videosource.camera.CameraVideoSourceImpl
+import com.mapbox.vision.video.videosource.camera.CompatFakeSurfaceTextureCameraVideoSourceImpl
 import com.mapbox.vision.view.VisualizationUpdateListener
 import com.mapbox.vision.visionevents.CalibrationProgress
 import com.mapbox.vision.visionevents.FrameSize
@@ -94,7 +93,7 @@ object VisionManager : ARDataProvider {
                 dirPath: String,
                 jsonFilePath: String
         ) {
-            telemetryManager.syncSessionDir(dirPath)
+//            telemetryManager.syncSessionDir(dirPath)
         }
     }
 
@@ -136,13 +135,8 @@ object VisionManager : ARDataProvider {
     }
 
     private val visionManagerVideoSourceListener = object : VideoSourceListener {
-
         override fun onNewFrame(rgbBytes: ByteArray) {
             visionCore.setRGBABytes(rgbBytes, videoSource.getSourceWidth(), videoSource.getSourceHeight())
-        }
-
-        override fun onNewBitmap(bitmap: Bitmap) {
-            // Do nothing
         }
 
         override fun onNewCameraParams(cameraParamsData: CameraParamsData) {
@@ -184,7 +178,9 @@ object VisionManager : ARDataProvider {
      * You should [destroy] when Vision SDK is no longer needed to release all resources.
      * No-op if called while SDK is created already.
      */
-    fun create() {
+    fun create(
+            videoSource: VideoSource = CompatFakeSurfaceTextureCameraVideoSourceImpl(application, FRAME_WIDTH, FRAME_HEIGHT)
+    ) {
         checkManagerInit()
         if (isCreated) {
             Log.w(TAG, "VisionManager was already created!")
@@ -209,7 +205,7 @@ object VisionManager : ARDataProvider {
         )
                 .createVisionCore(FRAME_WIDTH, FRAME_HEIGHT)
 
-        videoSource = CameraVideoSourceImpl(application, FRAME_WIDTH, FRAME_HEIGHT)
+        this.videoSource = videoSource
         sensorsRequestsManager = SensorsRequestsManager(application)
         sensorsRequestsManager.setSensorDataListener(visionManagerSensorDataListener)
         locationEngine = AndroidLocationEngineImpl(application)
@@ -244,10 +240,9 @@ object VisionManager : ARDataProvider {
 
         videoProcessor.setVideoProcessorListener(visionManagerVideoProcessorListener)
 
-        startTelemetry()
+//        startTelemetry()
         startAllHandlers()
 
-        videoSource.useBitmap(false)
         videoSource.attach(visionManagerVideoSourceListener)
         startSessionRecording()
 

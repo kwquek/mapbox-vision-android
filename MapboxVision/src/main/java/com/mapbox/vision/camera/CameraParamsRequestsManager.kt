@@ -26,8 +26,7 @@ class CameraParamsRequestsManager(private val previewSize: Size, private val foc
 
     fun startDataRequesting() {
         // TODO: Change logic to set it once per session
-        requestHandler.postDelayed({ requestParamsAndNotifyListener() }, UPDATE_DELAY)
-
+        requestHandler.postDelayed({ requestParamsAndNotifyListener() }, UPDATE_DELAY_MILLIS)
     }
 
     fun stopDataRequesting() {
@@ -37,12 +36,10 @@ class CameraParamsRequestsManager(private val previewSize: Size, private val foc
     private fun requestParamsAndNotifyListener() {
         val listener = cameraParamsListener ?: return
         listener.onCameraParamsReady(CameraParamsData(previewSize.width, previewSize.height, focalLength, focalInPixelsX, focalInPixelsY))
-        requestHandler.postDelayed({ requestParamsAndNotifyListener() }, UPDATE_DELAY)
+        requestHandler.postDelayed({ requestParamsAndNotifyListener() }, UPDATE_DELAY_MILLIS)
     }
 
     companion object {
-        private const val UPDATE_DELAY = (1000 * 5).toLong() // 5 second
+        private const val UPDATE_DELAY_MILLIS = 1000 * 5L // 5 seconds
     }
-
-
 }
