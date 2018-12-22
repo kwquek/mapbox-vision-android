@@ -4,6 +4,7 @@ import android.graphics.Rect
 import com.mapbox.vision.core.buffers.DetectionDataBuffer
 import com.mapbox.vision.visionevents.events.Image
 import com.mapbox.vision.visionevents.events.ObjectType
+import java.util.*
 
 /**
  * Holds [detections] with [sourceImage] they were made from.

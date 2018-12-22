@@ -30,6 +30,7 @@ import com.mapbox.vision.video.videoprocessor.VideoProcessor
 import com.mapbox.vision.video.videoprocessor.VideoProcessorListener
 import com.mapbox.vision.video.videosource.VideoSource
 import com.mapbox.vision.video.videosource.VideoSourceListener
+import com.mapbox.vision.video.videosource.camera.CameraVideoSourceImpl
 import com.mapbox.vision.video.videosource.camera.CompatFakeSurfaceTextureCameraVideoSourceImpl
 import com.mapbox.vision.view.VisualizationUpdateListener
 import com.mapbox.vision.visionevents.CalibrationProgress
@@ -179,7 +180,8 @@ object VisionManager : ARDataProvider {
      * No-op if called while SDK is created already.
      */
     fun create(
-            videoSource: VideoSource = CompatFakeSurfaceTextureCameraVideoSourceImpl(application, FRAME_WIDTH, FRAME_HEIGHT)
+//            videoSource: VideoSource = CompatFakeSurfaceTextureCameraVideoSourceImpl(application, FRAME_WIDTH, FRAME_HEIGHT)
+            videoSource: VideoSource = CameraVideoSourceImpl(application, FRAME_WIDTH, FRAME_HEIGHT)
     ) {
         checkManagerInit()
         if (isCreated) {
